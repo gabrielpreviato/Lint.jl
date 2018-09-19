@@ -13,5 +13,3 @@ elseif x == 1 && y == 2
     println("precompile")
 end
 """)
-
-lintfile("../LiquipediaScrapper.jl/src/parser.jl")

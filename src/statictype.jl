@@ -128,9 +128,9 @@ import Base.length
 If it can be determined that all objects of type `T` have length `n`, then
 return `Nullable(n)`. Otherwise, return `Nullable{Int}()`.
 """
-# length(::Type{Union{}}) = Nullable(0)
-# length(::Type) = Nullable{Int}()
-# length(::Type{T}) where {T<:Pair} = Nullable(2)
+length(::Type{Union{}}) = Nullable(0)
+length(::Type) = Nullable{Int}()
+length(::Type{T}) where {T<:Pair} = Nullable(2)
 
 if VERSION < v"0.6.0-dev.2123" # where syntax introduced by julia PR #18457
     length{T<:Tuple}(::Type{T}) = if !isa(T, DataType) || Core.Inference.isvatuple(T)
@@ -149,8 +149,8 @@ import Base.eltype
 Return `S` as specific as possible such that all objects of type `T` have
 element type `S`.
 """
-#eltype(::Type{Union{}}) = Union{}
-#eltype(T::Type) = Base.eltype(T)
+eltype(::Type{Union{}}) = Union{}
+eltype(T::Type) = Base.eltype(T)
 
 _getindex_nth(xs::Any, ::Type{Val{n}}) where {n} = xs[n]
 _typeof_nth_getindex(::Type{T}, n::Integer) where {T} =
