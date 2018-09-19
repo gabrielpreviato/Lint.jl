@@ -119,7 +119,7 @@ Note that, in particular, this is not true for `String` and `Dict`.
 getindexable(::Type{T}) where {T<:Union{Tuple,Pair,Array,Number}} = true
 getindexable(::Type) = false
 
-import Main.length
+import Base.length
 """
     StaticTypeAnalysis.length(T::Type) :: Nullable{Int}
 
@@ -140,7 +140,7 @@ else
     length(::Type{T}) where T <: NTuple{N, Any} where N = Nullable{Int}(N)
 end
 
-import Main.eltype
+import Base.eltype
 """
     StaticTypeAnalysis.eltype(T::Type)
 
