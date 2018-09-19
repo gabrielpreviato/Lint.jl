@@ -1,5 +1,7 @@
 module StaticTypeAnalysis
 
+using Nullables
+
 macro lintpragma(ex); end
 
 global const EQ_METHOD_FALSE = which(==, Tuple{Nothing, Int})
@@ -81,7 +83,7 @@ static type checking techniques to figure out a type `S` such that the result
 of applying `f` to `argtypes` is always of type `S`.
 """
 infertype(f, argtypes) = infertype(f, (argtypes...))
-function infertype(f, argtypes::Tuple)
+function infertype(f, argtypes::Array)
     if isknownerror(f, argtypes)
         Union{}
     elseif f === Base.getindex && Base.length(argtypes) == 2 &&

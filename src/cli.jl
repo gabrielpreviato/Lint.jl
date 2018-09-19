@@ -80,6 +80,7 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
     # i = start(str)
     i = iterate(str)
     while i !== nothing
+        println(i)
         (element, state_iter) = i
         state = state_iter - 1
         problem = false
@@ -96,7 +97,7 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
         end
         ctx.line = ctx.lineabs = linerange.start + lineoffset
         try
-            (ex, state) = parse(str,state)
+            (ex, state) = Meta.parse(str,state)
         catch y
             if typeof(y) != Meta.ParseError || y.msg != "end of input"
                 msg(ctx, :E111, string(y))
@@ -104,6 +105,7 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
             break
         end
         lintexpr(ex, ctx)
+        i = iterate(str, state_iter)
     end
 end
 
