@@ -107,7 +107,9 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
         end
         lintexpr(ex, ctx)
         i = iterate(str, state)
-        println("ending i: ", i)
+        if i !== nothing
+            println("ending i: ", i)
+        end
     end
 end
 
