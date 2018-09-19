@@ -33,7 +33,7 @@ function canequal(S::Type, T::Type)
         # TODO: this is not fully correct; some types are not Union{} but still
         # not instantiated
         return Nullable{Bool}(true)
-    elseif isleaftype(S) && isleaftype(T) &&
+    elseif isconcretetype(S) && isconcretetype(T) &&
            EQ_METHOD_FALSE == which(==, Tuple{S, T})
         # == falls back to === here, but we saw earlier that the intersection
         # is empty
@@ -92,7 +92,7 @@ function infertype(f, argtypes::Array)
         # TODO: would be nice to get rid of this odd special case
         UnitRange
     elseif isa(f, Type) && Base.length(argtypes) == 1 &&
-           isleaftype(argtypes[1]) &&
+           isconcretetype(argtypes[1]) &&
            which(f, Tuple{argtypes[1]}) === CONSTRUCTOR_FALLBACK
         # we can infer better code for the constructor `convert` fallback by
         # inferring the convert itself
@@ -128,9 +128,9 @@ import Base.length
 If it can be determined that all objects of type `T` have length `n`, then
 return `Nullable(n)`. Otherwise, return `Nullable{Int}()`.
 """
-length(::Type{Union{}}) = Nullable(0)
-length(::Type) = Nullable{Int}()
-length(::Type{T}) where {T<:Pair} = Nullable(2)
+# length(::Type{Union{}}) = Nullable(0)
+# length(::Type) = Nullable{Int}()
+# length(::Type{T}) where {T<:Pair} = Nullable(2)
 
 if VERSION < v"0.6.0-dev.2123" # where syntax introduced by julia PR #18457
     length{T<:Tuple}(::Type{T}) = if !isa(T, DataType) || Core.Inference.isvatuple(T)
