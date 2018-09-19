@@ -48,7 +48,7 @@ function lintfile(f::AbstractString)
     if !ispath(f)
         throw("no such file exists")
     end
-    str = open(readstring, f)
+    str = open(fi->read(fi, String), f)
     lintfile(f, str)
 end
 
