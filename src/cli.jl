@@ -82,8 +82,8 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
     i = iterate(str)
     while i !== nothing
         println("begin i: ", i)
-        (element, state_iter) = i
-        state = state_iter - 1
+        (element, state) = i
+        state = state - 1
         problem = false
         ex = nothing
         linerange = searchsorted(linecharc, state)
@@ -106,7 +106,7 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
             break
         end
         lintexpr(ex, ctx)
-        i = iterate(str, state_iter)
+        i = iterate(str, state)
         println("ending i: ", i)
     end
 end
