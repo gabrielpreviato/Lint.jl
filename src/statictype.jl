@@ -2,9 +2,11 @@ module StaticTypeAnalysis
 
 macro lintpragma(ex); end
 
+global const EQ_METHOD_FALSE = which(==, Tuple{Nothing, Int})
+# global const CONSTRUCTOR_FALLBACK = which(Void, Tuple{Void})
+
 function __init__()
-    global const EQ_METHOD_FALSE = which(==, Tuple{Void, Int})
-    global const CONSTRUCTOR_FALLBACK = which(Void, Tuple{Void})
+    Nothing
 end
 
 """
@@ -34,7 +36,7 @@ function canequal(S::Type, T::Type)
         # == falls back to === here, but we saw earlier that the intersection
         # is empty
         return Nullable(false)
-    elseif try zero(S) == zero(T) catch false end
+    elseif try zero(S) == zero(T) catch; false end
         return Nullable{Bool}(true)
     else
         return Nullable{Bool}()
@@ -114,9 +116,10 @@ operation on numbers is consistent with iteration order.
 
 Note that, in particular, this is not true for `String` and `Dict`.
 """
-getindexable{T<:Union{Tuple,Pair,Array,Number}}(::Type{T}) = true
+getindexable(::Type{T}) where {T<:Union{Tuple,Pair,Array,Number}} = true
 getindexable(::Type) = false
 
+import Main.length
 """
     StaticTypeAnalysis.length(T::Type) :: Nullable{Int}
 
@@ -125,7 +128,7 @@ return `Nullable(n)`. Otherwise, return `Nullable{Int}()`.
 """
 length(::Type{Union{}}) = Nullable(0)
 length(::Type) = Nullable{Int}()
-length{T<:Pair}(::Type{T}) = Nullable(2)
+length(::Type{T}) where {T<:Pair} = Nullable(2)
 
 if VERSION < v"0.6.0-dev.2123" # where syntax introduced by julia PR #18457
     length{T<:Tuple}(::Type{T}) = if !isa(T, DataType) || Core.Inference.isvatuple(T)
@@ -134,11 +137,10 @@ if VERSION < v"0.6.0-dev.2123" # where syntax introduced by julia PR #18457
         Nullable{Int}(Base.length(T.types))
     end
 else
-    include_string("""
     length(::Type{T}) where T <: NTuple{N, Any} where N = Nullable{Int}(N)
-    """)
 end
 
+import Main.eltype
 """
     StaticTypeAnalysis.eltype(T::Type)
 
@@ -148,8 +150,8 @@ element type `S`.
 eltype(::Type{Union{}}) = Union{}
 eltype(T::Type) = Base.eltype(T)
 
-_getindex_nth{n}(xs::Any, ::Type{Val{n}}) = xs[n]
-_typeof_nth_getindex{T}(::Type{T}, n::Integer) =
+_getindex_nth(xs::Any, ::Type{Val{n}}) where {n} = xs[n]
+_typeof_nth_getindex(::Type{T}, n::Integer) where {T} =
     infertype(_getindex_nth, Any[T, Type{Val{Int(n)}}])
 
 """
@@ -164,7 +166,7 @@ typeof_nth(T::Type, n::Integer) =
     else
         eltype(T)
     end
-typeof_nth{K,V}(::Type{Pair{K,V}}, n::Integer) =
+typeof_nth(::Type{Pair{K,V}}, n::Integer) where {K,V} =
     n == 1 ? K : n == 2 ? V : Union{}
 typeof_nth(::Type{Union{}}, ::Integer) = Union{}
 

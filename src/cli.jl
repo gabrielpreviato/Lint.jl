@@ -75,27 +75,29 @@ function lintfile(f::AbstractString, code::AbstractString)
 end
 
 function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
-    linecharc = cumsum(map(x->endof(x)+1, split(str, "\n", keep=true)))
+    linecharc = cumsum(map(x->lastindex(x)+1, split(str, "\n", keepempty=true)))
     numlines = length(linecharc)
-    i = start(str)
-    while !done(str,i)
+    # i = start(str)
+    i = iterate(str)
+    while i !== nothing
+        (element, state) = i
         problem = false
         ex = nothing
-        linerange = searchsorted(linecharc, i)
+        linerange = searchsorted(linecharc, state)
         if linerange.start > numlines # why is it not donw?
             break
         else
             linebreakloc = linecharc[linerange.start]
         end
-        if linebreakloc == i || isempty(strip(str[i:(linebreakloc-1)]))# empty line
-            i = linebreakloc + 1
+        if linebreakloc == state || isempty(strip(str[state:(linebreakloc-1)]))# empty line
+            state = linebreakloc + 1
             continue
         end
         ctx.line = ctx.lineabs = linerange.start + lineoffset
         try
-            (ex, i) = parse(str,i)
+            (ex, state) = parse(str,state)
         catch y
-            if typeof(y) != ParseError || y.msg != "end of input"
+            if typeof(y) != Meta.ParseError || y.msg != "end of input"
                 msg(ctx, :E111, string(y))
             end
             break

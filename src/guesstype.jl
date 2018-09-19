@@ -62,7 +62,7 @@ function guesstype(ex::Expr, ctx::LintContext)::Type
     end
 
     if isexpr(ex, :block)
-        return isempty(ex.args) ? Void : guesstype(ex.args[end], ctx)
+        return isempty(ex.args) ? Nothing : guesstype(ex.args[end], ctx)
     end
 
     if isexpr(ex, :return)
@@ -153,6 +153,7 @@ function guesstype(ex::Expr, ctx::LintContext)::Type
                 else
                     return eletyp
                 end
+            catch
             end
             return Any
         else
@@ -184,7 +185,7 @@ function guesstype(ex::Expr, ctx::LintContext)::Type
         ft = if length(ex.args) == 3
             guesstype(ex.args[3], ctx)
         else
-            Void
+            Nothing
         end
         if tt == ft
             # we need this case because tt and ft might be symbols

@@ -2,6 +2,7 @@ module ExpressionUtils
 
 using Base.Meta
 using ..LintCompat
+using Nullables
 
 export split_comparison, simplify_literal, ispairexpr, isliteral,
        lexicaltypeof, lexicalfirst, lexicallast, lexicalvalue,
@@ -184,7 +185,7 @@ expand_assignment(_) = Nullable()
 
 const COMPARISON_OPS = [:(==), :(<), :(>), :(<=), :(>=), :(!=)]
 
-immutable Import
+struct Import
     """
     The number of dots preceding the import. If `dots` is `0`, then this is a
     toplevel import (i.e., from Main, but additionally requiring the module if

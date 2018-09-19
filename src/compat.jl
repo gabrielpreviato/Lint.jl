@@ -3,11 +3,11 @@ module LintCompat
 export BROADCAST, flatten
 
 # TODO: remove when 0.5 support dropped
-function BROADCAST(f, x::Nullable)
-    if isnull(x)
-        Nullable()
+function BROADCAST(f, x::Union{T, Nothing}) where {T}
+    if x == nothing
+        nothing
     else
-        Nullable(f(get(x)))
+        f(x)
     end
 end
 
@@ -21,20 +21,20 @@ Often combined with broadcast as in `flatten(broadcast(f, x))`, which is like
 `broadcast(f, x)`, except returns the result of `f` directly. Expects `f` to
 return a `Nullable` value.
 """
-function flatten{T}(x::Nullable{Nullable{T}})
-    if isnull(x)
-        Nullable{T}()
+function flatten(x::Union{Union{T, Nothing}, Nothing}) where {T}
+    if x == nothing
+        nothing
     else
-        get(x)
+        x
     end
 end
 
 # fallback method for e.g. Nullable{Any}, Nullable{Union{}}
-function flatten(x::Nullable)
-    if isnull(x)
-        Nullable()
+function flatten(x::Union{T, Nothing}) where {T}
+    if x == nothing
+        nothing
     else
-        get(x) :: Nullable
+        x :: Union{T, Nothing}
     end
 end
 

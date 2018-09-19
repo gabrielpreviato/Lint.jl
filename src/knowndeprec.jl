@@ -1,9 +1,9 @@
 # all usage of deprecated functions are warning
 # all method extensions of deprecated generic functions are errors
 
-type DeprecateInfo
+mutable struct DeprecateInfo
     funcname::Any
-    sig::Union{Void, Array{Any,1}}
+    sig::Union{Nothing, Array{Any,1}}
     message::Compat.String
     line::Int
 end
@@ -14,17 +14,22 @@ function initDeprecateInfo()
     if sf === nothing
         return
     end
-    str = open(readstring, sf)
-    linecharc = cumsum(map(x->length(x)+1, @compat(split(str, "\n", keep=true))))
+    str = open(f->read(f, String), sf)
+    linecharc = cumsum(map(x->length(x)+1, @compat(split(str, "\n", keepempty=true))))
 
-    i = start(str)
+    # i = start(str)
+    i = iterate(str)
+    # print(typeof(i))
     lineabs = 1
-    while !done(str,i)
+    while i !== nothing
+        (element, state) = i
+        # print(typeof(element))
+        # print(typeof(state))
         problem = false
         ex = nothing
-        lineabs = searchsorted(linecharc, i).start
+        lineabs = searchsorted(linecharc, state).start
         try
-            (ex, i) = parse(str, i)
+            (ex, state) = parse(str, state)
         catch
             problem = true
         end
@@ -227,6 +232,7 @@ function funcMatchesDeprecateInfo(sig, di::DeprecateInfo)
             ret = false
             try
                 ret = eval(:($s1 <: $s2))
+            catch
             end
             return ret
         elseif typeof(s1) == Expr && typeof(s2) == Expr && s1.head == s2.head && length(s1.args)==length(s2.args)

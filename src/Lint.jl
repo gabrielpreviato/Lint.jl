@@ -7,6 +7,8 @@ using Compat
 using Compat: TypeUtils, readline
 using JSON
 using AutoHashEquals
+using Nullables
+using Printf
 
 if isdefined(Base, :unwrap_unionall)
     using Base: unwrap_unionall

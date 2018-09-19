@@ -5,7 +5,7 @@ include("types/lintmessage.jl")
 # tree toward the root
 import Base: parent
 
-function Typeof(x::ANY)
+function Typeof(x::Any)
     if x === Vararg
         typeof(x)
     elseif isa(x, Type)
@@ -21,7 +21,7 @@ extractobject(_::AdditionalVarInfo) = Nullable()
 """
 A struct with information about a variable.
 """
-type VarInfo
+mutable struct VarInfo
     location::Location
     typeactual::Type
 
@@ -56,7 +56,7 @@ end
 extractobject(vi::VarInfo) =
     flatten(BROADCAST(extractobject, vi.extra))
 
-immutable ModuleInfo <: AdditionalVarInfo
+struct ModuleInfo <: AdditionalVarInfo
     name          :: Symbol
     globals       :: Dict{Symbol, VarInfo}
     exports       :: Set{Symbol}
@@ -84,7 +84,7 @@ function lookup(data::ModuleInfo, sym::Symbol)::Nullable{VarInfo}
     return Nullable{VarInfo}()
 end
 
-immutable MethodInfo <: AdditionalVarInfo
+struct MethodInfo <: AdditionalVarInfo
     # signature :: ...
     location :: Location
     body     :: Any
@@ -96,7 +96,7 @@ location(mi::MethodInfo) = mi.location
 The binding is known to reference a standard library object. The "standard
 library" consists of `Core`, `Base`, `Compat`, and their submodules.
 """
-immutable StandardLibraryObject <: AdditionalVarInfo
+struct StandardLibraryObject <: AdditionalVarInfo
     object :: Any
 end
 # TODO: remove {typeof(x.object)} part when #21397 fixed
@@ -104,14 +104,14 @@ extractobject(x::StandardLibraryObject) =
     Nullable{typeof(x.object)}(x.object)
 
 # TODO: currently, this is not actually used
-immutable FunctionInfo <: AdditionalVarInfo
+struct FunctionInfo <: AdditionalVarInfo
     name    :: Symbol
     methods :: Vector{MethodInfo}
 end
 name(data::FunctionInfo) = data.name
 method!(data::FunctionInfo, mi::MethodInfo) = push!(data.methods, mi)
 
-type PragmaInfo
+mutable struct PragmaInfo
     location :: Location
     used     :: Bool
 end
@@ -130,7 +130,7 @@ localset!(ctx::_LintContext, sym::Symbol, info::VarInfo) =
     set!(ctx, sym, info)
 
 # A special context for linting a `module` keyword
-immutable ModuleContext <: _LintContext
+struct ModuleContext <: _LintContext
     parent        :: Nullable{_LintContext}
     data          :: ModuleInfo
     pragmas       :: Dict{String, PragmaInfo}
@@ -174,7 +174,7 @@ function finish(ctx::ModuleContext, cursor)
     end
 end
 
-type LocalContext <: _LintContext
+mutable struct LocalContext <: _LintContext
     parent        :: _LintContext
     declglobs     :: Set{Symbol}
     localvars     :: Dict{Symbol, VarInfo}
@@ -256,7 +256,7 @@ function lookup(ctx::LocalContext, name::Symbol)::Nullable{VarInfo}
     end
 end
 
-@auto_hash_equals immutable LintIgnore
+@auto_hash_equals struct LintIgnore
     errorcode :: Symbol
     variable  :: String
 end
@@ -267,7 +267,7 @@ const LINT_IGNORE_DEFAULT = [
     LintIgnore(:W651, "")
 ]
 
-type LintContext
+mutable struct LintContext
     file         :: String
     "Current line number."
     line         :: Int
@@ -326,8 +326,12 @@ function msg(ctx::LintContext, code::Symbol, variable, str::AbstractString)
     variable = string(variable)
     m = LintMessage(location(ctx), code, ctx.scope, variable, str)
     # filter out messages to ignore
-    i = max(findfirst(ctx.ignore, LintIgnore(code, variable)),
-            findfirst(ctx.ignore, LintIgnore(code, "")))
+    f1 = findfirst(x -> x == LintIgnore(code, variable), ctx.ignore)
+    f1 = f1 == nothing ? 0 : f1
+    f2 = findfirst(x -> x == LintIgnore(code, ""), ctx.ignore)
+    f2 = f2 == nothing ? 0 : f2
+
+    i = max(f1, f2)
     if i == 0
         push!(ctx.messages, m)
     end
