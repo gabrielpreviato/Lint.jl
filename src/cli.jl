@@ -80,7 +80,8 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
     # i = start(str)
     i = iterate(str)
     while i !== nothing
-        (element, state) = i
+        (element, state_iter) = i
+        state = state_iter - 1
         problem = false
         ex = nothing
         linerange = searchsorted(linecharc, state)

@@ -22,7 +22,8 @@ function initDeprecateInfo()
     # print(typeof(i))
     lineabs = 1
     while i !== nothing
-        (element, state) = i
+        (element, state_iter) = i
+        state = state_iter - 1
         # print(typeof(element))
         # print(typeof(state))
         problem = false
