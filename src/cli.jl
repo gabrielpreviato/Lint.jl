@@ -78,6 +78,7 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
     linecharc = cumsum(map(x->lastindex(x)+1, split(str, "\n", keepempty=true)))
     numlines = length(linecharc)
     # i = start(str)
+    println(str)
     i = iterate(str)
     while i !== nothing
         println("begin i: ", i)
