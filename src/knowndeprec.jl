@@ -22,8 +22,8 @@ function initDeprecateInfo()
     # print(typeof(i))
     lineabs = 1
     while i !== nothing
-        (element, state_iter) = i
-        state = state_iter - 1
+        (element, state) = i
+        state = state - 1
         # print(typeof(element))
         # print(typeof(state))
         problem = false
@@ -39,6 +39,7 @@ function initDeprecateInfo()
         else
             break
         end
+        i = iterate(str, state)
     end
 end
 
@@ -92,7 +93,7 @@ function parseDeprecate(ex, lineabs)
             # can't deal with complex expressions like Broadcast.func yet
             return
         end
-        if in(funcname, [:depwarn, :firstcaller]) || contains(lowercase(string(funcname)), "deprecate")
+        if in(funcname, [:depwarn, :firstcaller]) || occursin(lowercase("deprecate", string(funcname)))
             # the first two are support functions.
             # Any function declaration that has "deprecate" in the name...
             # well, the user/developer should know what they are in for.
@@ -128,7 +129,7 @@ function parseDeprecate(ex, lineabs)
             oldcall = sprint(io->Base.show_unquoted(io,old))
             newcall = sprint(io->Base.show_unquoted(io,new))
 
-            if contains(string(funcname), "deprecate")
+            if occursin("deprecate", string(funcname))
                 return
             end
             if sig == nothing

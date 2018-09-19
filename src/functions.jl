@@ -66,7 +66,7 @@ function lintfunction(ex::Expr, ctx::LintContext; ctorType = Symbol(""), isstage
     end
 
     ctx.scope = string(fname)
-    if fname != Symbol("") && !contains(ctx.file, "deprecate")
+    if fname != Symbol("") && !occursin("deprecate", ctx.file)
         isDeprecated = functionIsDeprecated(ex.args[1])
         if isDeprecated != nothing && !pragmaexists("Ignore deprecated $fname", ctx.current)
             msg(ctx, :E211, ex.args[1], "$(isDeprecated.message); See: " *
@@ -367,7 +367,7 @@ function lintfunctioncall(ex::Expr, ctx::LintContext; inthrow::Bool=false)
 
         if !inthrow && isa(ex.args[1], Symbol)
             s = lowercase(string(ex.args[1]))
-            if contains(s,"error") || contains(s,"exception") || contains(s,"mismatch") || contains(s,"fault")
+            if occursin("error",s) || occursin("exception",s) || occursin("mismatch",s) || occursin("fault",s)
                 try
                     dt = parsetype(ctx, ex.args[1])
                     if dt <: Exception && !pragmaexists( "Ignore unthrown " * string(ex.args[1]), ctx.current)
