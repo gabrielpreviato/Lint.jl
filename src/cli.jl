@@ -83,22 +83,22 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
     while i !== nothing
         println("begin i: ", i)
         (element, state) = i
-        state = state - 1
+        # state = state - 1
         problem = false
         ex = nothing
-        linerange = searchsorted(linecharc, state)
+        linerange = searchsorted(linecharc, state - 1)
         if linerange.start > numlines # why is it not donw?
             break
         else
             linebreakloc = linecharc[linerange.start]
         end
-        if linebreakloc == state || isempty(strip(str[state:(linebreakloc-1)]))# empty line
+        if linebreakloc == state - 1 || isempty(strip(str[state - 1:(linebreakloc-1)]))# empty line
             state = linebreakloc + 1
             continue
         end
         ctx.line = ctx.lineabs = linerange.start + lineoffset
         try
-            (ex, state) = Meta.parse(str,state)
+            (ex, state) = Meta.parse(str,state - 1)
         catch y
             if typeof(y) != Meta.ParseError || y.msg != "end of input"
                 msg(ctx, :E111, string(y))
