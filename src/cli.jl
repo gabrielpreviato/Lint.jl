@@ -85,7 +85,7 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
         problem = false
         ex = nothing
         linerange = searchsorted(linecharc, state - 1)
-        linebreakloc = 1
+        linebreakloc = -1
         if linerange.start > numlines # why is it not donw?
             break
         else

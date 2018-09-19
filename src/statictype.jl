@@ -149,8 +149,8 @@ import Base.eltype
 Return `S` as specific as possible such that all objects of type `T` have
 element type `S`.
 """
-eltype(::Type{Union{}}) = Union{}
-eltype(T::Type) = Base.eltype(T)
+#eltype(::Type{Union{}}) = Union{}
+#eltype(T::Type) = Base.eltype(T)
 
 _getindex_nth(xs::Any, ::Type{Val{n}}) where {n} = xs[n]
 _typeof_nth_getindex(::Type{T}, n::Integer) where {T} =
