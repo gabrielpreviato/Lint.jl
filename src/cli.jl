@@ -78,22 +78,21 @@ function _lintstr(str::AbstractString, ctx::LintContext, lineoffset = 0)
     linecharc = cumsum(map(x->lastindex(x)+1, split(str, "\n", keepempty=true)))
     numlines = length(linecharc)
     # i = start(str)
-    println(str)
     i = iterate(str)
     while i !== nothing
         println("begin i: ", i)
         (element, state) = i
-        # state = state - 1
         problem = false
         ex = nothing
         linerange = searchsorted(linecharc, state - 1)
+        linebreakloc = 1
         if linerange.start > numlines # why is it not donw?
             break
         else
             linebreakloc = linecharc[linerange.start]
         end
         if linebreakloc == state - 1 || isempty(strip(str[state - 1:(linebreakloc-1)]))# empty line
-            state = linebreakloc + 1
+            i = iterate(str, state)
             continue
         end
         ctx.line = ctx.lineabs = linerange.start + lineoffset

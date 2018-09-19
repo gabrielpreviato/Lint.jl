@@ -223,13 +223,13 @@ Return an `Import` from extracting the important semantics from the given
 expression `ex`, or `Nullable()` otherwise.
 """
 function understand_import(ex)::Nullable{Import}
-    if !isexpr(ex, [:using, :import, :importall])
+    if !isexpr(ex, [:using, :import])
         return Nullable()
     end
 
     kind = ex.head
     dots = 0
-    for x in ex.args
+    for x in ex.args[1].args
         if x === :.
             dots += 1
         else
@@ -238,7 +238,7 @@ function understand_import(ex)::Nullable{Import}
     end
     path = ex.args[dots+1:end]
 
-    Import(dots, path, kind)
+    Import(dots, path[1].args, kind)
 end
 
 end

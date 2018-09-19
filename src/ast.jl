@@ -58,7 +58,7 @@ function lintexpr(ex::Expr, ctx::LintContext)
         lintmodule(ex, ctx)
     elseif ex.head == :export
         lintexport(ex, ctx)
-    elseif isexpr(ex, [:import, :using, :importall])
+    elseif isexpr(ex, [:import, :using])
         lintimport(ex, ctx)
     elseif ex.head == :comparison # only the odd indices
         for i in 1:2:length(ex.args)
